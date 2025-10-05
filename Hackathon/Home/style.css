@@ -1,0 +1,136 @@
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+
+body {
+  background-color: #0b0b1a;
+  color: #e6e6f0;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+/* Header Section */
+.header h1 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.header p {
+  color: #b0b0c0;
+  font-size: 1rem;
+  margin-bottom: 40px;
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Styling */
+.card {
+  background: linear-gradient(145deg, #1a1a2e, #12121f);
+  border-radius: 20px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+}
+
+/* Card Content */
+.card h2 {
+  font-size: 1.2rem;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #bdbdc9;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+/* Code Block */
+pre {
+  background: #0e0e1b;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  color: #00ffff;
+}
+
+/* Image */
+.card img {
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+/* AI Circle */
+.circle {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #6dfcff, #0066ff);
+  border-radius: 50%;
+  margin: 20px auto;
+}
+
+/* Tech Buttons */
+.tech {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tech button {
+  padding: 6px 15px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #b0b0b0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tech button.active {
+  background: #00ffff;
+  color: #000;
+}
+
+.tech button:hover {
+  background: #00ffff;
+  color: #000;
+}
+
+.logo{
+    width: 100px;
+}
+
+.card-hover:hover{
+text-align: center;
+color:cyan; font-size:20px; transition:all 0.4s ease;
+ 
+/* display:inline-block */
+}

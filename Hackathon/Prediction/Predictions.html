@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClimaXplorer</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" href="Prediction.css">
+</head>
+
+<body>
+ 
+  <div id="loader" class="loader-overlay">
+    <div class="loader"></div>
+    <div class="loader-text">Analyzing NASA satellite data...</div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-left">
+        <div>
+          <h1>ClimaXplorer</h1>
+          <div class="tagline">Advanced NASA-powered weather intelligence for your events</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="theme-toggle" id="themeToggle">
+          <div class="theme-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <span id="themeText">Dark Mode</span>
+        </div>
+        <button class="home" onclick="navigateTo('/Hackathon/Home/index.html')">
+          <i class="fas fa-home"></i>
+          <span>Back to home</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input id="cityInput" type="text" placeholder="Enter city (e.g., Karachi, Pakistan)" />
+      <input id="dateInput" type="date" />
+      <input id="timeInput" type="time" value="14:00" />
+      <button id="predictBtn">
+        <i class="fas fa-satellite"></i>
+        Analyze with NASA Data
+      </button>
+      <button id="locBtn">
+        <i class="fas fa-location-arrow"></i>
+        Use my location
+      </button>
+    </div>
+
+    <!-- NEW: Alert Panel -->
+    <div class="card fade-in" id="alertPanel" style="display: none;">
+      <h3>🚨 Real-Time Weather Alerts</h3>
+      <div class="notification-panel">
+        <div id="liveAlerts"></div>
+      </div>
+    </div>
+
+    <div id="result">
+      <div class="main-content">
+        <div class="left-content">
+          <!-- Event Type Selection -->
+          <div class="card fade-in">
+            <h3 style="margin-bottom: 20px;">What type of event are you planning?</h3>
+            <div class="event-type-selector">
+              <div class="event-type-btn active" data-event="outdoor">
+                <i class="fas fa-umbrella-beach"></i>
+                Outdoor Party
+              </div>
+              <div class="event-type-btn" data-event="wedding">
+                <i class="fas fa-ring"></i>
+                Wedding
+              </div>
+              <div class="event-type-btn" data-event="sports">
+                <i class="fas fa-running"></i>
+                Sports Game
+              </div>
+              <div class="event-type-btn" data-event="festival">
+                <i class="fas fa-music"></i>
+                Festival
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Main Results Card -->
+          <div class="card fade-in" id="resultsCard" style="display: none;">
+            <div class="success-card">
+              <div class="success-icon" id="successIcon">😊</div>
+              <div class="small" id="eventContext">Your outdoor party in</div>
+              <div class="huge success" id="successRate">—</div>
+              <div class="small">
+                chance of perfect weather
+                <span class="confidence-badge" id="confidenceBadge">82% confident</span>
+              </div>
+              
+              <!-- NEW: Rain Safety Index -->
+              <div class="safety-index" id="safetyIndexContainer">
+                <span class="safety-label">Rain Safety Index:</span>
+                <span class="safety-value safety-low" id="safetyIndex">Low Risk</span>
+              </div>
+
+              <!-- NEW: Rain Intensity Indicator -->
+              <div class="small" style="margin-top: 10px;">
+                Expected: <span id="rainIntensity">Light showers</span>
+                <span class="intensity-indicator">
+                  <span class="intensity-dot" id="intensityDot"></span>
+                  <span id="duration">(2-3 hours)</span>
+                </span>
+              </div>
+
+              <!-- Risk Meter -->
+              <div class="risk-meter">
+                <div id="riskLevel" class="risk-level risk-low" style="width: 0%"></div>
+              </div>
+              <div class="risk-labels">
+                <span>Low Risk</span>
+                <span>Medium Risk</span>
+                <span>High Risk</span>
+              </div>
+              
+              <!-- Data Source Indicator -->
+              <div class="data-source" id="dataSourceIndicator">Using NASA Historical Data</div>
+            </div>
+
+            <!-- NEW: Timeline Forecast -->
+            <div class="timeline-container">
+              <div class="small"><strong>Hourly Forecast:</strong></div>
+              <div class="timeline-bar" id="timelineBar"></div>
+            </div>
+
+            <!-- Weather Factors -->
+            <div class="weather-factors">
+              <div class="factor-card">
+                <div class="small">Rain Probability</div>
+                <div class="factor-value" id="rainProb">—</div>
+                <div class="small" id="rainConfidence">82% confidence</div>
+                <!-- NEW: Flood Risk Indicator -->
+                <div class="flood-risk" id="floodRisk" style="display: none;">
+                  🚨 High Flood Risk
+                </div>
+              </div>
+              <div class="factor-card">
+                <div class="small">Temperature</div>
+                <div class="factor-value" id="tempInfo">—</div>
+                <div class="small">Feels like <span id="feelsLike">—</span></div>
+              </div>
+              <div class="factor-card">
+                <div class="small">Wind Impact</div>
+                <div class="factor-value" id="windInfo">—</div>
+                <div class="small" id="windGust">Gusts: —</div>
+              </div>
+              <div class="factor-card">
+                <div class="small">Comfort Index</div>
+                <div class="factor-value" id="comfortIndex">—</div>
+                <div class="small" id="airQuality">Air: —</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced Recommendations -->
+          <div class="card fade-in" id="recommendationsCard" style="display: none;">
+            <h3>📋 Smart Event Planning Guide</h3>
+            <div class="recommendations">
+              <div id="recommendationList"></div>
+            </div>
+            
+            <!-- NEW: Action Cards -->
+            <div class="action-buttons">
+              <button id="exportBtn" class="action-btn secondary-btn">
+                <i class="fas fa-file-export"></i>
+                Export Full Report
+              </button>
+              <button id="calendarBtn" class="action-btn secondary-btn">
+                <i class="fas fa-calendar-plus"></i>
+                Add to Calendar
+              </button>
+              <button id="alternativeBtn" class="action-btn secondary-btn">
+                <i class="fas fa-clock"></i>
+                Find Better Time
+              </button>
+            </div>
+          </div>
+
+          <!-- NEW: Interactive Map Section -->
+          <div class="card fade-in" id="mapSection" style="display: none;">
+            <h3>🗺️ Live Weather Map</h3>
+            <div class="map-controls">
+              <button id="satelliteBtn" class="secondary-btn" style="padding: 8px 12px;">
+                <i class="fas fa-satellite"></i>
+                Toggle Satellite
+              </button>
+              <button id="precipitationBtn" class="secondary-btn" style="padding: 8px 12px;">
+                <i class="fas fa-cloud-rain"></i>
+                Precipitation Layer
+              </button>
+              <button id="eventsBtn" class="secondary-btn" style="padding: 8px 12px;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Weather Events
+              </button>
+              <button id="worldviewBtn" class="secondary-btn" style="padding: 8px 12px;">
+                <i class="fas fa-globe"></i>
+                Toggle Worldview
+              </button>
+            </div>
+            <div class="map-container" style="height: 300px;">
+              <div id="detailedMap"></div>
+            </div>
+
+           
+            <div id="worldviewContainer" style="margin-top: 12px; display:none;">
+              <iframe id="worldviewFrame" width="100%" height="380" frameborder="0"
+                src="https://worldview.earthdata.nasa.gov/?v=0,0,0,0&l=Reference_Labels,VIIRS_SNPP_CorrectedReflectance_TrueColor,MODIS_Terra_CorrectedReflectance_TrueColor,GEOS-FP_Soil_Moisture&tl=e">
+              </iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-content">
+         
+          <div class="card fade-in">
+            <h3>📍 Your Location</h3>
+            <div class="map-container">
+              <div id="map"></div>
+            </div>
+            <div style="margin-top: 15px;">
+              <div id="cityName" class="big">—</div>
+              <div id="coords" class="small">—</div>
+            </div>
+          </div>
+
+          <!-- Enhanced Historical Data -->
+          <div class="card fade-in" id="historyCard" style="display: none;">
+            <h3>📊 Historical Analysis</h3>
+            <div class="small">NASA 20-year climate patterns</div>
+            <div class="big success" style="text-align: center; margin: 15px 0;" id="historicalSuccess">—</div>
+            <div class="small" style="text-align: center;">of similar days had good weather</div>
+            <div class="small" style="text-align: center; margin-top: 10px;" id="trendIndicator"></div>
+          </div>
+
+          <!-- Enhanced Best Alternatives -->
+          <div class="card fade-in" id="alternativesCard" style="display: none;">
+            <h3>💡 Optimal Timing</h3>
+            <div class="small">AI-suggested better options</div>
+            <div id="alternativeDates">
+              <!-- Dynamic content will be loaded here -->
+            </div>
+          </div>
+
+          <!-- NEW: Community Insights -->
+          <div class="card fade-in" id="communityCard" style="display: none;">
+            <h3>👥 Local Insights</h3>
+            <div class="small">Recent weather patterns in your area:</div>
+            <div id="communityReports"></div>
+            <button id="reportWeather" class="secondary-btn" style="width: 100%; margin-top: 10px;">
+              <i class="fas fa-edit"></i>
+              Report Current Weather
+            </button>
+          </div>
+
+          <!-- Enhanced NASA Badge -->
+          <div class="card fade-in">
+            <h3>🛰️ Powered by NASA</h3>
+            <div class="small">Live data from:</div>
+            <div class="small">• GPM IMERG / GES DISC (attempted)</div>
+            <div class="small">• Giovanni (metadata via CMR)</div>
+            <div class="small">• Data Rods / Hydrology datasets (CMR)</div>
+            <div class="small">• Worldview imagery</div>
+            <div class="note" style="margin-top: 15px;">
+              <strong>New:</strong> Live NASA POWER + EONET + Worldview integration. Some datasets (NetCDF) may require Earthdata login and are attempted via token.
+            </div>
+
+            <!-- Quick dataset links container (filled by CMR search) -->
+            <div id="nasaDatasetLinks" style="margin-top:12px; font-size:12px; color:var(--text-tertiary)"></div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div><strong>NASA Space Apps Challenge 2025 - EventWeather AI</strong></div>
+        <div>Now with live NASA data integration, AI forecasting, and community insights</div>
+      </footer>
+    </div>
+  </div>
+
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <script src="Prediction.js"></script>
+</body>
+</html>
